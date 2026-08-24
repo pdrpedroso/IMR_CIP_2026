@@ -81,7 +81,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        # EXERCÍCIO 1 - Controle individual das rodas
+   
         keys = pygame.key.get_pressed()
 
         v_left = 0.0
