@@ -2,7 +2,6 @@ import pygame
 import math
 import numpy as np
 
-# Constantes de Configuração
 LARGURA_TELA = 800
 ALTURA_TELA = 600
 FPS = 60
