@@ -115,3 +115,340 @@ def main():
 if __name__ == "__main__":
     main()
 
+
+
+import math
+import numpy as np
+import pygame
+
+LARGURA, ALTURA = 900, 650
+FPS = 60
+ALCANCE_MAX = 200.0
+ANGULOS = [-60, -30, 0, 30, 60]
+
+COR_FUNDO = (20, 24, 30)
+COR_ROBO = (0, 200, 255)
+COR_OBSTACULO = (180, 50, 50)
+COR_RAIO = (0, 255, 100)
+COR_PONTO = (255, 200, 0)
+
+def distancia_raio_retangulo(x, y, angulo, rect, alcance):
+    """Encontra a primeira interseção de um raio com um retângulo."""
+    dx = math.cos(angulo)
+    dy = math.sin(angulo)
+    menor = alcance
+
+
+    lados = [
+        ((rect.left, rect.top), (rect.right, rect.top)),
+        ((rect.right, rect.top), (rect.right, rect.bottom)),
+        ((rect.right, rect.bottom), (rect.left, rect.bottom)),
+        ((rect.left, rect.bottom), (rect.left, rect.top)),
+    ]
+
+    for (x1, y1), (x2, y2) in lados:
+        sx, sy = x2 - x1, y2 - y1
+        den = dx * sy - dy * sx
+        if abs(den) < 1e-9:
+            continue
+        t = ((x1 - x) * sy - (y1 - y) * sx) / den
+        u = ((x1 - x) * dy - (y1 - y) * dx) / den
+        if t >= 0 and 0 <= u <= 1 and t < menor:
+            menor = t
+
+    return menor
+
+def distancia_parede(x, y, angulo, alcance):
+    """Calcula a distância até a parede da janela."""
+    dx, dy = math.cos(angulo), math.sin(angulo)
+    distancias = []
+    if dx > 0: distancias.append((LARGURA - x) / dx)
+    elif dx < 0: distancias.append((0 - x) / dx)
+    if dy > 0: distancias.append((ALTURA - y) / dy)
+    elif dy < 0: distancias.append((0 - y) / dy)
+    validas = [d for d in distancias if d >= 0]
+    return min(validas) if validas else alcance
+
+def medir_sensores(x, y, theta, obstaculos):
+    leituras = []
+    pontos = []
+    for graus in ANGULOS:
+        angulo = theta + math.radians(graus)
+        distancia = min(ALCANCE_MAX, distancia_parede(x, y, angulo, ALCANCE_MAX))
+        for obs in obstaculos:
+            distancia = min(distancia, distancia_raio_retangulo(x, y, angulo, obs, ALCANCE_MAX))
+
+       
+        medida = max(0.0, min(ALCANCE_MAX, distancia + np.random.normal(0, 2.0)))
+        leituras.append(medida)
+        pontos.append((x + medida * math.cos(angulo), y + medida * math.sin(angulo)))
+    return leituras, pontos
+
+pygame.init()
+screen = pygame.display.set_mode((LARGURA, ALTURA))
+pygame.display.set_caption('Laboratório 3 - 5 Sensores de Feixe')
+clock = pygame.time.Clock()
+font = pygame.font.SysFont('monospace', 15)
+
+robot_x, robot_y = 180.0, 325.0
+theta = 0.0
+obstaculos = [
+    pygame.Rect(350, 150, 100, 350),
+    pygame.Rect(600, 90, 150, 110),
+    pygame.Rect(600, 410, 150, 140),
+]
+
+rodando = True
+ultima_leitura = [ALCANCE_MAX] * 5
+
+while rodando:
+    clock.tick(FPS)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            rodando = False
+
+    
+    mx, my = pygame.mouse.get_pos()
+    dx, dy = mx - robot_x, my - robot_y
+    theta = math.atan2(dy, dx)
+    robot_x += dx * 0.03
+    robot_y += dy * 0.03
+
+    ultima_leitura, pontos = medir_sensores(robot_x, robot_y, theta, obstaculos)
+
+    screen.fill(COR_FUNDO)
+    for obs in obstaculos:
+        pygame.draw.rect(screen, COR_OBSTACULO, obs)
+        pygame.draw.rect(screen, (255, 100, 100), obs, 2)
+
+    for i, graus in enumerate(ANGULOS):
+        angulo = theta + math.radians(graus)
+        ex = robot_x + ALCANCE_MAX * math.cos(angulo)
+        ey = robot_y + ALCANCE_MAX * math.sin(angulo)
+        px, py = pontos[i]
+        pygame.draw.line(screen, COR_RAIO, (int(robot_x), int(robot_y)), (int(ex), int(ey)), 2)
+        pygame.draw.circle(screen, COR_PONTO, (int(px), int(py)), 4)
+
+    pygame.draw.circle(screen, COR_ROBO, (int(robot_x), int(robot_y)), 16)
+    fx = robot_x + 24 * math.cos(theta)
+    fy = robot_y + 24 * math.sin(theta)
+    pygame.draw.line(screen, (255, 50, 50), (int(robot_x), int(robot_y)), (int(fx), int(fy)), 3)
+
+    for i, (graus, dist) in enumerate(zip(ANGULOS, ultima_leitura)):
+        texto = f'Sensor {i+1} ({graus:+d}°): {dist:6.1f} px'
+        screen.blit(font.render(texto, True, (220, 220, 220)), (20, 20 + i * 22))
+    screen.blit(font.render('Mova o mouse para testar os 5 sensores.', True, (255, 215, 0)), (20, 145))
+    pygame.display.flip()
+
+pygame.quit()
+print('Laboratório 3 encerrado.')
+print('5 sensores: -60°, -30°, 0°, +30° e +60°')
+print('Alcance máximo: 200 px | Ruído: normal(0, 2.0)')
+
+
+
+import math
+import pygame
+
+
+LARGURA, ALTURA = 900, 650
+FPS = 60
+
+
+ALCANCE_SENSOR = 120.0
+LIMIAR_DESVIO = 60.0
+DISTANCIA_PARADA = 15.0
+K_ALVO = 1.8
+K_OBS = 1.5 
+VELOCIDADE_MAX = 110.0
+VELOCIDADE_MIN = 35.0
+
+ANGULOS_SENSORES = [-math.pi/4, 0.0, math.pi/4]  
+
+COR_FUNDO = (20, 24, 30)
+COR_ROBO = (0, 200, 255)
+COR_OBSTACULO = (180, 50, 50)
+COR_RAIO = (0, 255, 100)
+COR_ALERTA = (255, 200, 0)
+COR_ALVO = (255, 255, 255)
+
+pygame.init()
+screen = pygame.display.set_mode((LARGURA, ALTURA))
+pygame.display.set_caption("Laboratório 5 - Go-to-Goal com Desvio Reativo")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont("monospace", 15)
+
+def distancia_parede(x, y, angulo):
+    dx, dy = math.cos(angulo), math.sin(angulo)
+    valores = []
+    if dx > 0: valores.append((LARGURA-x)/dx)
+    elif dx < 0: valores.append((0-x)/dx)
+    if dy > 0: valores.append((ALTURA-y)/dy)
+    elif dy < 0: valores.append((0-y)/dy)
+    validos = [d for d in valores if d >= 0]
+    return min(validos) if validos else ALCANCE_SENSOR
+
+
+def distancia_raio_retangulo(x, y, angulo, rect, alcance=ALCANCE_SENSOR):
+    dx, dy = math.cos(angulo), math.sin(angulo)
+    menor = alcance
+    lados = [
+        ((rect.left, rect.top), (rect.right, rect.top)),
+        ((rect.right, rect.top), (rect.right, rect.bottom)),
+        ((rect.right, rect.bottom), (rect.left, rect.bottom)),
+        ((rect.left, rect.bottom), (rect.left, rect.top)),
+    ]
+    for (x1,y1),(x2,y2) in lados:
+        sx, sy = x2-x1, y2-y1
+        den = dx*sy - dy*sx
+        if abs(den) < 1e-9:
+            continue
+        t = ((x1-x)*sy - (y1-y)*sx)/den
+        u = ((x1-x)*dy - (y1-y)*dx)/den
+        if t >= 0 and 0 <= u <= 1:
+            menor = min(menor, t)
+    return menor
+
+
+def medir_sensores(x, y, theta, obstaculos):
+    leituras = []
+    pontos = []
+    for beta in ANGULOS_SENSORES:
+        angulo = theta + beta
+        d = min(ALCANCE_SENSOR, distancia_parede(x, y, angulo))
+        for obs in obstaculos:
+            d = min(d, distancia_raio_retangulo(x, y, angulo, obs))
+        leituras.append(d)
+        pontos.append((x + d*math.cos(angulo), y + d*math.sin(angulo)))
+    return leituras, pontos
+def normalizar_angulo(a):
+    return (a + math.pi) % (2*math.pi) - math.pi
+
+
+def controlador(robot_x, robot_y, theta, alvo, sensores):
+    
+    dx = alvo[0] - robot_x
+    dy = alvo[1] - robot_y
+    distancia = math.hypot(dx, dy)
+    angulo_alvo = math.atan2(dy, dx)
+    erro_angular = normalizar_angulo(angulo_alvo - theta)
+    omega_alvo = K_ALVO * erro_angular
+
+    
+    omega_repulsivo = 0.0
+    emergencia = False
+    for beta, sensor_d in zip(ANGULOS_SENSORES, sensores):
+        if sensor_d < LIMIAR_DESVIO:
+            emergencia = True
+            
+            si = (LIMIAR_DESVIO - sensor_d) / LIMIAR_DESVIO
+            if beta < 0:
+                sinal = 1.0
+            elif beta > 0:
+                sinal = -1.0
+            else:
+                sinal = 1.0 if erro_angular >= 0 else -1.0
+            omega_repulsivo += K_OBS * si * sinal
+
+    omega_total = omega_alvo + omega_repulsivo
+
+    if distancia < DISTANCIA_PARADA:
+        return 0.0, 0.0, distancia, False, omega_alvo, omega_repulsivo
+
+   
+    v = min(VELOCIDADE_MAX, max(VELOCIDADE_MIN, 0.8 * distancia))
+    if abs(erro_angular) > math.pi/2:
+        v = VELOCIDADE_MIN
+
+    return v, omega_total, distancia, emergencia, omega_alvo, omega_repulsivo
+robot_x, robot_y = 120.0, 325.0
+theta = 0.0
+target = None
+rodando = True
+
+obstaculos = [
+    pygame.Rect(300, 100, 100, 300),
+    pygame.Rect(500, 300, 120, 250),
+    pygame.Rect(690, 90, 120, 170),
+]
+
+while rodando:
+    dt = clock.tick(FPS) / 1000.0
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            rodando = False
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            target = event.pos
+
+    sensores, pontos = medir_sensores(robot_x, robot_y, theta, obstaculos)
+
+    if target is not None:
+        v, omega, dist_alvo, emergencia, omega_alvo, omega_repulsivo = controlador(
+            robot_x, robot_y, theta, target, sensores
+        )
+
+        
+        theta = normalizar_angulo(theta + omega * dt)
+        novo_x = robot_x + v * math.cos(theta) * dt
+        novo_y = robot_y + v * math.sin(theta) * dt
+
+        
+        candidato = pygame.Rect(int(novo_x)-12, int(novo_y)-12, 24, 24)
+        if (0 <= novo_x <= LARGURA and 0 <= novo_y <= ALTURA and
+            not any(candidato.colliderect(obs) for obs in obstaculos)):
+            robot_x, robot_y = novo_x, novo_y
+
+        if dist_alvo < DISTANCIA_PARADA:
+            target = None
+    else:
+        dist_alvo = None
+        emergencia = False
+        omega_alvo = 0.0
+        omega_repulsivo = 0.0
+
+    
+    screen.fill(COR_FUNDO)
+    for obs in obstaculos:
+        pygame.draw.rect(screen, COR_OBSTACULO, obs)
+        pygame.draw.rect(screen, (255,100,100), obs, 2)
+
+    if target is not None:
+        pygame.draw.circle(screen, COR_ALVO, target, 8, 2)
+        pygame.draw.line(screen, COR_ALVO, target, (target[0]+12, target[1]), 1)
+
+    for i, beta in enumerate(ANGULOS_SENSORES):
+        angulo = theta + beta
+        d = sensores[i]
+        cor = COR_ALERTA if d < LIMIAR_DESVIO else COR_RAIO
+        ex = robot_x + d*math.cos(angulo)
+        ey = robot_y + d*math.sin(angulo)
+        pygame.draw.line(screen, cor, (int(robot_x),int(robot_y)), (int(ex),int(ey)), 2)
+        pygame.draw.circle(screen, cor, (int(ex),int(ey)), 4)
+        texto = f"S{i+1}: {d:5.1f}px"
+        screen.blit(font.render(texto, True, cor), (20, 20+i*22))
+
+    pygame.draw.circle(screen, COR_ROBO, (int(robot_x),int(robot_y)), 16)
+    fx = robot_x + 25*math.cos(theta)
+    fy = robot_y + 25*math.sin(theta)
+    pygame.draw.line(screen, (255,50,50), (int(robot_x),int(robot_y)), (int(fx),int(fy)), 3)
+
+    if target is None:
+        status = "Clique com o mouse para definir um alvo."
+    elif emergencia:
+        status = "MODO 2: DESVIO DE EMERGENCIA"
+    else:
+        status = "MODO 1: ATRACAO AO ALVO"
+
+    screen.blit(font.render(status, True, (255,215,0)), (20, 140))
+    if target is not None:
+        screen.blit(font.render(f"Distancia ao alvo: {dist_alvo:5.1f}px", True, (220,220,220)), (20,165))
+        screen.blit(font.render(f"omega alvo: {omega_alvo:+.2f} | repulsivo: {omega_repulsivo:+.2f}", True, (220,220,220)), (20,190))
+    screen.blit(font.render("Alvo: clique esquerdo | Pare quando distancia < 15 px", True, (180,180,180)), (20, 620))
+
+    pygame.display.flip()
+
+pygame.quit()
+print("Laboratório 5 encerrado.")
+print("O robô usa atração proporcional ao alvo e desvio reativo abaixo de 60 px.")
+print("Critério de parada: distância menor que 15 px do alvo.")
