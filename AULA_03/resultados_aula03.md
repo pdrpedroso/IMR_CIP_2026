@@ -6,3 +6,5 @@
 
 <img width="898" height="675" alt="exercicio5" src="https://github.com/user-attachments/assets/e42f06e0-0e93-4b11-89a9-f1a455635050" />
 
+Foi possível observar, através dos exercícios a maneira como o robô usa seus sensores para detectar obstáculos, calcular seus movimentos e girar para seguir seus objetivos. O úlitmo exercício chamou mais atenção particularmente por juntar os outros conceitos, exigindo que o robô desviasse dos obstáculos e voltasse ao seu objetivo inicial. 
+
