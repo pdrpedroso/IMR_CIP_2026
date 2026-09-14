@@ -1,1 +1,25 @@
-Neste exercício, o robô é controlado por comandos de velocidade linear e angular em malha aberta. Inicialmente, determina-se a pose final prevista por meio da integração analítica do modelo unicycle. Em seguida, o deslocamento do robô é reproduzido no Pygame utilizando integração numérica. Ao final da execução, o programa apresenta no terminal a pose calculada teoricamente, a pose obtida na simulação e o erro, ou diferença, entre os dois resultados. 
+Exercício 1: Validador de Pose em malha aberta (Cinemática Diferencial)
+Neste exercício, o robô é controlado por comandos de velocidade linear e angular em malha aberta. Inicialmente, determina-se a pose final prevista por meio da integração 
+analítica do modelo unicycle. Em seguida, o deslocamento do robô é reproduzido no Pygame utilizando integração numérica. Ao final da execução, o programa apresenta no 
+terminal a pose calculada teoricamente, a pose obtida na simulação e o erro, ou diferença, entre os dois resultados. 
+
+Exercício 2: Calculadora de giro Ackermann vs. Diferencial
+Neste exemplo, é utilizado o modelo de direção Ackermann. Os comandos pelas setas ↑ e ↓ são responsáveis por aumentar ou diminuir a velocidade do robô, enquanto as teclas
+← e → permitem ajustar o ângulo de esterçamento das rodas, com limite de até ±30°. Durante a execução, o sistema apresenta informações como a velocidade angular e o 
+raio da trajetória realizada. Além disso, ao pressionar a tecla G, é possível alternar para uma comparação com um robô de acionamento diferencial, que possui a capacidade de 
+realizar rotações sobre o próprio eixo quando está parado, característica que não está presente no modelo Ackermann. Print da execução:
+
+Exercício 3: Varredura Sensorial com Filtro de Alcance e Desvio de Ruído
+O robô conta com sete sensores posicionados ao longo de um campo de visão de 180°. Para tornar a simulação mais próxima de uma situação real, é adicionado ruído gaussiano aos 
+valores obtidos pelos sensores. Em seguida, essas informações passam por um processo de filtragem, no qual são descartadas leituras muito pequenas e restringidos os valores 
+que excedem o limite máximo de alcance. Dessa forma, torna-se possível analisar e comparar os dados coletados antes e depois da aplicação do filtro. Print da execução:
+
+Exercício 4: Braitenberg com conexões diretas (Comportamento de Agressão/Atração)
+O robô utiliza dois sensores, cada um associado diretamente a uma das rodas. Ao detectar a aproximação de um obstáculo pelo lado direito, o sensor correspondente provoca um 
+aumento na velocidade da roda direita, fazendo com que o robô altere sua trajetória e se direcione para o obstáculo. Esse comportamento representa uma resposta de atração, 
+também caracterizada como agressiva. Durante a simulação, é possível movimentar o obstáculo manualmente utilizando o mouse. Print da execução:
+
+Exercício 5: Centralização autônoma em corredor (Controle Proporcional)
+Por fim, o robô inicia a simulação fora do centro do corredor e realiza a correção de sua trajetória de forma automática, buscando alcançar uma posição centralizada. 
+Para isso, são utilizados dois sensores laterais, responsáveis por medir a distância entre o robô e cada uma das paredes. A diferença entre essas duas medidas é utilizada 
+para determinar o sentido da correção, permitindo que o robô ajuste sua direção até ficar devidamente alinhado no centro do corredor.Print da execução:
