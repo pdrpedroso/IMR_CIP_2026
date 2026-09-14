@@ -1,1 +1,1 @@
-
+Neste exercício, o robô é controlado por comandos de velocidade linear e angular em malha aberta. Inicialmente, determina-se a pose final prevista por meio da integração analítica do modelo unicycle. Em seguida, o deslocamento do robô é reproduzido no Pygame utilizando integração numérica. Ao final da execução, o programa apresenta no terminal a pose calculada teoricamente, a pose obtida na simulação e o erro, ou diferença, entre os dois resultados. 
