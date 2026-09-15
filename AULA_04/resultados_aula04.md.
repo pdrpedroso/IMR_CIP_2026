@@ -24,4 +24,3 @@ Por fim, o robô inicia a simulação fora do centro do corredor e realiza a cor
 Para isso, são utilizados dois sensores laterais, responsáveis por medir a distância entre o robô e cada uma das paredes. A diferença entre essas duas medidas é utilizada 
 para determinar o sentido da correção, permitindo que o robô ajuste sua direção até ficar devidamente alinhado no centro do corredor.Print da execução:
 
-https://www.ilovepdf.com/pt/download/j999qsAfnls68c39srfffjh7sws7ndhnd046nc2w33kh0c2khqk9md2lb62xx9kvAx119jltclcAzjz1A2mrdsp37467clx06ccp3cfscAl870z1Al9gvh94xvjkvnjwcs8nbh90xwphvg4vvcmyvzxd5l0ykgx4bgkrgr5cc3q7w2rx3A7q/51
