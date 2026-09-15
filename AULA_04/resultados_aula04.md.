@@ -2,7 +2,7 @@ Exercício 1: Validador de Pose em malha aberta (Cinemática Diferencial)
 Neste exercício, o robô é controlado por comandos de velocidade linear e angular em malha aberta. Inicialmente, determina-se a pose final prevista por meio da integração 
 analítica do modelo unicycle. Em seguida, o deslocamento do robô é reproduzido no Pygame utilizando integração numérica. Ao final da execução, o programa apresenta no 
 terminal a pose calculada teoricamente, a pose obtida na simulação e o erro, ou diferença, entre os dois resultados. 
-![Execução do exercício](./EX.1.png)
+
 
 Exercício 2: Calculadora de giro Ackermann vs. Diferencial
 Neste exemplo, é utilizado o modelo de direção Ackermann. Os comandos pelas setas ↑ e ↓ são responsáveis por aumentar ou diminuir a velocidade do robô, enquanto as teclas
